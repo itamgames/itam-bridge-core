@@ -1,7 +1,6 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity 0.7.3;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import '@openzeppelin/contracts/access/Ownable.sol';
 import './BEP20.sol';
 import './TransferHelper.sol';
 
@@ -12,11 +11,11 @@ contract BSCBridge is Ownable {
     uint256 defaultTransitFee;
 
     mapping(address => uint256) transitFee;
-    mapping(bytes32 => bool) executed;
+    mapping(string => bool) executed;
     mapping(address => address) ercToBep;
     mapping(address => address) bepToErc;
 
-    event Transit(address indexed ercToken, address indexed to, uint256 amount, bytes32 transitId);
+    event Transit(address indexed ercToken, address indexed to, uint256 amount, string transitId);
     event Payback(address indexed ercToken, address indexed to, uint256 amount);
 
     constructor(address _signer, uint256 _defaultTransitFee) public {
@@ -38,10 +37,10 @@ contract BSCBridge is Ownable {
         TransferHelper.safeTransferETH(_to, _amount);
     }
 
-    function transit(address _ercToken, string memory _name, string memory _symbol, uint256 _amount, bytes32 _transitId, bytes calldata _signature) external payable {
+    function transit(address _ercToken, string memory _name, string memory _symbol, uint256 _amount, string memory _transitId, bytes calldata _signature) external payable {
         require(!executed[_transitId], "already transit");
         require(_amount > 0, "amount must be greater than 0");
-        
+
         bytes32 message = keccak256(abi.encodePacked(_ercToken, _amount, _transitId));
         bytes32 signature = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
 
@@ -51,7 +50,7 @@ contract BSCBridge is Ownable {
         if (ercToBep[_ercToken] == address(0)) {
             transitFee[_ercToken] = defaultTransitFee;
             
-            bytes memory bytecode = type(ItamERC20).creationCode;
+            bytes memory bytecode = abi.encodePacked(type(ItamERC20).creationCode, abi.encode(_name, _symbol));
             bytes32 salt = keccak256(abi.encodePacked(_ercToken, _name, _symbol));
             address newToken;
             assembly {
@@ -62,9 +61,7 @@ contract BSCBridge is Ownable {
         }
         require(transitFee[_ercToken] == msg.value, "invalid transit fee");
 
-        ItamERC20 bep20Contract = ItamERC20(ercToBep[_ercToken]);
-        bep20Contract.mint(msg.sender, _amount);
-
+        ItamERC20(ercToBep[_ercToken]).mint(msg.sender, _amount);
         executed[_transitId] = true;
         emit Transit(_ercToken, msg.sender, _amount, _transitId);
     }
