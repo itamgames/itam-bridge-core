@@ -1,16 +1,17 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+pragma solidity 0.7.3;
+
+import '@openzeppelin/contracts/math/SafeMath.sol';
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
 import './TransferHelper.sol';
 
 contract ETHBridge is Ownable {
     using SafeMath for uint;
     address public signer;
-    mapping(bytes32 => bool) executed;
+    mapping(string => bool) executed;
 
     event Transit(address indexed ercToken, address indexed to, uint256 amount);
-    event Withdraw(address indexed ercToken, address indexed to, uint256 amount, bytes32 withdrawId);
+    event Withdraw(address indexed ercToken, address indexed to, uint256 amount, string withdrawId);
 
     constructor(address _signer) public {
         signer = _signer;
@@ -22,7 +23,7 @@ contract ETHBridge is Ownable {
         emit Transit(_ercToken, msg.sender, _amount);
     }
 
-    function withdraw(bytes calldata _signature, bytes32 _withdrawId, address _ercToken, uint _amount) external {
+    function withdraw(bytes calldata _signature, string memory _withdrawId, address _ercToken, uint _amount) external {
         require(!executed[_withdrawId], "already withdraw");
         require(_amount > 0, "amount must be greater than 0");
 
