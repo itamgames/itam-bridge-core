@@ -8,7 +8,7 @@ import './TransferHelper.sol';
 contract ETHBridge is Ownable {
     using SafeMath for uint;
     address public signer;
-    mapping(string => bool) executed;
+    mapping(string => bool) public executed;
 
     event Transit(address indexed ercToken, address indexed to, uint256 indexed amount);
     event Withdraw(address indexed ercToken, address indexed to, uint256 indexed amount, string withdrawId);
