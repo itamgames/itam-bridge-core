@@ -15,7 +15,7 @@ contract BSCBridge is Ownable {
     mapping(address => address) ercToBep;
     mapping(address => address) bepToErc;
 
-    event Transit(address indexed ercToken, address indexed to, uint256 amount, string transitId);
+    event Transit(address indexed ercToken, address indexed to, uint256 indexed amount, string transitId);
     event Payback(address indexed ercToken, address indexed to, uint256 amount);
 
     constructor(address _signer, uint256 _defaultTransitFee) public {

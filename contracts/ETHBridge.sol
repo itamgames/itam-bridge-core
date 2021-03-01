@@ -10,8 +10,8 @@ contract ETHBridge is Ownable {
     address public signer;
     mapping(string => bool) executed;
 
-    event Transit(address indexed ercToken, address indexed to, uint256 amount);
-    event Withdraw(address indexed ercToken, address indexed to, uint256 amount, string withdrawId);
+    event Transit(address indexed ercToken, address indexed to, uint256 indexed amount);
+    event Withdraw(address indexed ercToken, address indexed to, uint256 indexed amount, string withdrawId);
 
     constructor(address _signer) public {
         signer = _signer;
