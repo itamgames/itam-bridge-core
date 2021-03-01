@@ -17,6 +17,7 @@ contract BSCBridge is Ownable {
 
     event Transit(address indexed ercToken, address indexed to, uint256 indexed amount, string transitId);
     event Payback(address indexed ercToken, address indexed to, uint256 amount);
+    event CreateToken(address indexed bepToken, string indexed name, string indexed symbol);
 
     constructor(address _signer, uint256 _defaultTransitFee) public {
         signer = _signer;
@@ -58,6 +59,8 @@ contract BSCBridge is Ownable {
             }
             ercToBep[_ercToken] = newToken;
             bepToErc[newToken] = _ercToken;
+
+            emit CreateToken(newToken, _name, _symbol);
         }
         require(transitFee[_ercToken] == msg.value, "invalid transit fee");
 
