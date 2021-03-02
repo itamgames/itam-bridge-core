@@ -7,8 +7,8 @@ import './TransferHelper.sol';
 contract BSCBridge is Ownable {
     using SafeMath for uint;
     
-    address signer;
-    uint256 defaultTransitFee;
+    address public signer;
+    uint256 public defaultTransitFee;
 
     mapping(address => uint256) public transitFee;
     mapping(string => bool) public executed;
@@ -41,12 +41,15 @@ contract BSCBridge is Ownable {
     function transit(address _ercToken, string memory _name, string memory _symbol, uint256 _amount, string memory _transitId, bytes calldata _signature) external payable {
         require(!executed[_transitId], "already transit");
         require(_amount > 0, "amount must be greater than 0");
-
-        bytes32 message = keccak256(abi.encodePacked(_ercToken, _amount, msg.sender, _transitId));
+        
+        uint chainId;
+        assembly {
+            chainId := chainid()
+        }
+        bytes32 message = keccak256(abi.encodePacked(chainId, address(this), _ercToken, _amount, msg.sender, _transitId));
         bytes32 signature = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
 
-        address recoveredAddress = _recoverAddress(signature, _signature);
-        require(recoveredAddress == signer, "invalid signature");
+        require(_recoverAddress(signature, _signature) == signer, "invalid signature");
 
         if (ercToBep[_ercToken] == address(0)) {
             transitFee[_ercToken] = defaultTransitFee;

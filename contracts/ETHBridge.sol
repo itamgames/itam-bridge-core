@@ -27,11 +27,14 @@ contract ETHBridge is Ownable {
         require(!executed[_withdrawId], "already withdraw");
         require(_amount > 0, "amount must be greater than 0");
 
-        bytes32 message = keccak256(abi.encodePacked(_ercToken, _amount, msg.sender, _withdrawId));
+        uint chainId;
+        assembly {
+            chainId := chainid()
+        }
+        bytes32 message = keccak256(abi.encodePacked(chainId, address(this), _ercToken, _amount, msg.sender, _withdrawId));
         bytes32 signature = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
 
-        address recoveredAddress = _recoverAddress(signature, _signature);
-        require(recoveredAddress == signer, "invalid signature");
+        require(_recoverAddress(signature, _signature) == signer, "invalid signature");
 
         TransferHelper.safeTransfer(_ercToken, msg.sender, _amount);
         executed[_withdrawId] = true;
