@@ -1,6 +1,7 @@
 pragma solidity 0.7.3;
 
 import '@openzeppelin/contracts/math/SafeMath.sol';
+import '@openzeppelin/contracts/cryptography/ECDSA.sol';
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './TransferHelper.sol';
@@ -34,7 +35,7 @@ contract ETHBridge is Ownable {
         bytes32 message = keccak256(abi.encodePacked(chainId, address(this), _ercToken, _amount, msg.sender, _withdrawId));
         bytes32 signature = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
 
-        require(_recoverAddress(signature, _signature) == signer, "invalid signature");
+        require(ECDSA.recover(signature, _signature) == signer, "invalid signature");
 
         TransferHelper.safeTransfer(_ercToken, msg.sender, _amount);
         executed[_withdrawId] = true;
@@ -43,22 +44,5 @@ contract ETHBridge is Ownable {
 
     function changeSigner(address _signer) onlyOwner external {
         signer = _signer;
-    }
-
-    function _recoverAddress(bytes32 _hash, bytes memory _signatures) pure public returns(address) {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-        
-        uint offset = 0 * 65;
-        assembly {
-            r := mload(add(_signatures, add(32, offset)))
-            s := mload(add(_signatures, add(64, offset)))
-            v := and(mload(add(_signatures, add(65, offset))), 0xff)
-        }
-        if (v < 27) v += 27;
-        require(v == 27 || v == 28);
-        
-        return ecrecover(_hash, v, r, s);
     }
 }
