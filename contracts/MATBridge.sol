@@ -39,7 +39,7 @@ contract MATBridge is Ownable {
         TransferHelper.safeTransferETH(_to, _amount);
     }
 
-    function transit(address _ercToken, string memory _name, string memory _symbol, uint256 _amount, string memory _transitId, uint256 feeAmount, bytes calldata _signature) external payable {
+    function transit(address _ercToken, string memory _name, string memory _symbol, uint256 _amount, string memory _transitId, bytes calldata _signature) external payable {
         require(!executed[_transitId], "already transit");
         require(_amount > 0, "amount must be greater than 0");
 
@@ -47,7 +47,7 @@ contract MATBridge is Ownable {
         assembly {
             chainId := chainid()
         }
-        bytes32 message = keccak256(abi.encodePacked(chainId, address(this), _ercToken, _amount, msg.sender, _transitId, feeAmount));
+        bytes32 message = keccak256(abi.encodePacked(chainId, address(this), _ercToken, _amount, msg.sender, _transitId));
         bytes32 signature = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", message));
 
         require(ECDSA.recover(signature, _signature) == signer, "invalid signature");
