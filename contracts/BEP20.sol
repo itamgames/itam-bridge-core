@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.7.3;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
- 
+
 contract ItamERC20 is ERC20, Ownable {
-    constructor(string memory name, string memory symbol) ERC20(name, symbol) public {}
+    constructor(string memory name, string memory symbol)
+        public
+        ERC20(name, symbol)
+    {}
 
     function mint(address to, uint256 value) external onlyOwner {
         super._mint(to, value);

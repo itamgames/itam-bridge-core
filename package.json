@@ -10,7 +10,7 @@
   "author": "itamgames",
   "license": "ISC",
   "dependencies": {
-    "@openzeppelin/contracts": "^3.4.0"
+    "@openzeppelin/contracts": "^4.0.0-beta.0"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.1",
